@@ -23,7 +23,7 @@ import "sync"
 // call is an in-flight or completed Do call
 type call struct {
 	wg  sync.WaitGroup
-	val interface{}
+	val any
 	err error
 }
 
@@ -34,15 +34,21 @@ type Group struct {
 	m  map[string]*call // lazily initialized
 }
 
+func NewGroup() *Group {
+	return &Group{
+		m: make(map[string]*call),
+	}
+}
+
 // Do executes and returns the results of the given function, making
 // sure that only one execution is in-flight for a given key at a
 // time. If a duplicate comes in, the duplicate caller waits for the
 // original to complete and receives the same results.
-func (g *Group) Do(key string, fn func() (interface{}, error)) (interface{}, error) {
+func (g *Group) Do(key string, fn func() (any, error)) (any, error) {
 	g.mu.Lock()
-	if g.m == nil {
-		g.m = make(map[string]*call)
-	}
+	// if g.m == nil {
+	// 	g.m = make(map[string]*call)
+	// }
 	if c, ok := g.m[key]; ok {
 		g.mu.Unlock()
 		c.wg.Wait()

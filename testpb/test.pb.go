@@ -527,7 +527,7 @@ func file_test_proto_rawDescGZIP() []byte {
 }
 
 var file_test_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
-var file_test_proto_goTypes = []interface{}{
+var file_test_proto_goTypes = []any{
 	(*TestMessage)(nil),   // 0: TestMessage
 	(*TestRequest)(nil),   // 1: TestRequest
 	(*TestResponse)(nil),  // 2: TestResponse
@@ -557,7 +557,7 @@ func file_test_proto_init() {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_test_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_test_proto_msgTypes[0].Exporter = func(v any, i int) any {
 			switch v := v.(*TestMessage); i {
 			case 0:
 				return &v.state
@@ -569,7 +569,7 @@ func file_test_proto_init() {
 				return nil
 			}
 		}
-		file_test_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_test_proto_msgTypes[1].Exporter = func(v any, i int) any {
 			switch v := v.(*TestRequest); i {
 			case 0:
 				return &v.state
@@ -581,7 +581,7 @@ func file_test_proto_init() {
 				return nil
 			}
 		}
-		file_test_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_test_proto_msgTypes[2].Exporter = func(v any, i int) any {
 			switch v := v.(*TestResponse); i {
 			case 0:
 				return &v.state
@@ -593,7 +593,7 @@ func file_test_proto_init() {
 				return nil
 			}
 		}
-		file_test_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_test_proto_msgTypes[3].Exporter = func(v any, i int) any {
 			switch v := v.(*CacheStats); i {
 			case 0:
 				return &v.state
@@ -605,7 +605,7 @@ func file_test_proto_init() {
 				return nil
 			}
 		}
-		file_test_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_test_proto_msgTypes[4].Exporter = func(v any, i int) any {
 			switch v := v.(*StatsResponse); i {
 			case 0:
 				return &v.state
@@ -617,7 +617,7 @@ func file_test_proto_init() {
 				return nil
 			}
 		}
-		file_test_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_test_proto_msgTypes[5].Exporter = func(v any, i int) any {
 			switch v := v.(*Empty); i {
 			case 0:
 				return &v.state
@@ -630,11 +630,11 @@ func file_test_proto_init() {
 			}
 		}
 	}
-	file_test_proto_msgTypes[0].OneofWrappers = []interface{}{}
-	file_test_proto_msgTypes[1].OneofWrappers = []interface{}{}
-	file_test_proto_msgTypes[2].OneofWrappers = []interface{}{}
-	file_test_proto_msgTypes[3].OneofWrappers = []interface{}{}
-	file_test_proto_msgTypes[4].OneofWrappers = []interface{}{}
+	file_test_proto_msgTypes[0].OneofWrappers = []any{}
+	file_test_proto_msgTypes[1].OneofWrappers = []any{}
+	file_test_proto_msgTypes[2].OneofWrappers = []any{}
+	file_test_proto_msgTypes[3].OneofWrappers = []any{}
+	file_test_proto_msgTypes[4].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
