@@ -85,6 +85,8 @@ func NewGroup(name string, cacheBytes int64, getter Getter) *Group {
 	return newGroup(name, cacheBytes, getter, nil)
 }
 
+var _ flightGroup = singleflight.NewGroup()
+
 // If peers is nil, the peerPicker is called via a sync.Once to initialize it.
 func newGroup(name string, cacheBytes int64, getter Getter, peers PeerPicker) *Group {
 	if getter == nil {
@@ -101,7 +103,7 @@ func newGroup(name string, cacheBytes int64, getter Getter, peers PeerPicker) *G
 		getter:     getter,
 		peers:      peers,
 		cacheBytes: cacheBytes,
-		loadGroup:  &singleflight.Group{},
+		loadGroup:  singleflight.NewGroup(),
 	}
 	if fn := newGroupHook; fn != nil {
 		fn(g)
@@ -178,7 +180,7 @@ type Group struct {
 // implementation.
 type flightGroup interface {
 	// Done is called when Do is done.
-	Do(key string, fn func() (interface{}, error)) (interface{}, error)
+	Do(key string, fn func() (any, error)) (any, error)
 }
 
 // Stats are per-group statistics.
@@ -236,7 +238,7 @@ func (g *Group) Get(ctx context.Context, key string, dest Sink) error {
 // load loads key either by invoking the getter locally or by sending it to another machine.
 func (g *Group) load(ctx context.Context, key string, dest Sink) (value ByteView, destPopulated bool, err error) {
 	g.Stats.Loads.Add(1)
-	viewi, err := g.loadGroup.Do(key, func() (interface{}, error) {
+	viewi, err := g.loadGroup.Do(key, func() (any, error) {
 		// Check the cache again because singleflight can only dedup calls
 		// that overlap concurrently.  It's possible for 2 concurrent
 		// requests to miss the cache, resulting in 2 load() calls.  An
@@ -412,7 +414,7 @@ func (c *cache) add(key string, value ByteView) {
 	defer c.mu.Unlock()
 	if c.lru == nil {
 		c.lru = &lru.Cache{
-			OnEvicted: func(key lru.Key, value interface{}) {
+			OnEvicted: func(key lru.Key, value any) {
 				val := value.(ByteView)
 				c.nbytes -= int64(len(key.(string))) + int64(val.Len())
 				c.nevict++

@@ -33,8 +33,8 @@ type complexStruct struct {
 
 var getTests = []struct {
 	name       string
-	keyToAdd   interface{}
-	keyToGet   interface{}
+	keyToAdd   any
+	keyToGet   any
 	expectedOk bool
 }{
 	{"string_hit", "myKey", "myKey", true},
@@ -75,7 +75,7 @@ func TestRemove(t *testing.T) {
 
 func TestEvict(t *testing.T) {
 	evictedKeys := make([]Key, 0)
-	onEvictedFun := func(key Key, value interface{}) {
+	onEvictedFun := func(key Key, value any) {
 		evictedKeys = append(evictedKeys, key)
 	}
 

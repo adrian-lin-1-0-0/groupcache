@@ -35,6 +35,8 @@ const defaultBasePath = "/_groupcache/"
 
 const defaultReplicas = 50
 
+var _ PeerPicker = (*HTTPPool)(nil)
+
 // HTTPPool implements PeerPicker for a pool of HTTP peers.
 type HTTPPool struct {
 	// Context optionally specifies a context for the server to use when it
@@ -189,7 +191,7 @@ type httpGetter struct {
 }
 
 var bufferPool = sync.Pool{
-	New: func() interface{} { return new(bytes.Buffer) },
+	New: func() any { return new(bytes.Buffer) },
 }
 
 func (h *httpGetter) Get(ctx context.Context, in *pb.GetRequest, out *pb.GetResponse) error {

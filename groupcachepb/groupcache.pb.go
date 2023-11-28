@@ -179,7 +179,7 @@ func file_groupcache_proto_rawDescGZIP() []byte {
 }
 
 var file_groupcache_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_groupcache_proto_goTypes = []interface{}{
+var file_groupcache_proto_goTypes = []any{
 	(*GetRequest)(nil),  // 0: GetRequest
 	(*GetResponse)(nil), // 1: GetResponse
 }
@@ -199,7 +199,7 @@ func file_groupcache_proto_init() {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_groupcache_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_groupcache_proto_msgTypes[0].Exporter = func(v any, i int) any {
 			switch v := v.(*GetRequest); i {
 			case 0:
 				return &v.state
@@ -211,7 +211,7 @@ func file_groupcache_proto_init() {
 				return nil
 			}
 		}
-		file_groupcache_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_groupcache_proto_msgTypes[1].Exporter = func(v any, i int) any {
 			switch v := v.(*GetResponse); i {
 			case 0:
 				return &v.state
@@ -224,7 +224,7 @@ func file_groupcache_proto_init() {
 			}
 		}
 	}
-	file_groupcache_proto_msgTypes[1].OneofWrappers = []interface{}{}
+	file_groupcache_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
