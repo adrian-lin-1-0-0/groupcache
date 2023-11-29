@@ -27,8 +27,8 @@ class Getter{
 class Global {
     - groups : map[string]*Group
 
-    + GetGroup(name string) *Group
-    + NewGroup(name string, cacheBytes int64, getter Getter) *Group
+    + GetGroup(name string): *Group
+    + NewGroup(name string, cacheBytes int64, getter Getter): *Group
 }
 
 class flightGroup{
