@@ -27,6 +27,7 @@ import (
 	"sync"
 
 	"github.com/adrian-lin-1-0-0/groupcache/consistenthash"
+	"github.com/adrian-lin-1-0-0/groupcache/discovery"
 	pb "github.com/adrian-lin-1-0-0/groupcache/groupcachepb"
 	"google.golang.org/protobuf/proto"
 )
@@ -58,6 +59,8 @@ type HTTPPool struct {
 	mu          sync.Mutex // guards peers and httpGetters
 	peers       *consistenthash.Map
 	httpGetters map[string]*httpGetter // keyed by e.g. "http://10.0.0.2:8008"
+
+	discovery discovery.Client // discovery client
 }
 
 // HTTPPoolOptions are the configurations of a HTTPPool.
@@ -127,6 +130,20 @@ func (p *HTTPPool) Set(peers ...string) {
 	for _, peer := range peers {
 		p.httpGetters[peer] = &httpGetter{transport: p.Transport, baseURL: peer + p.opts.BasePath}
 	}
+}
+
+func (p *HTTPPool) Add(peer string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.peers.Add(peer)
+	p.httpGetters[peer] = &httpGetter{transport: p.Transport, baseURL: peer + p.opts.BasePath}
+}
+
+func (p *HTTPPool) Remove(peer string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.peers.Remove(peer)
+	delete(p.httpGetters, peer)
 }
 
 func (p *HTTPPool) PickPeer(key string) (ProtoGetter, bool) {
@@ -230,4 +247,66 @@ func (h *httpGetter) Get(ctx context.Context, in *pb.GetRequest, out *pb.GetResp
 		return fmt.Errorf("decoding response body: %v", err)
 	}
 	return nil
+}
+
+// set discovery
+func (p *HTTPPool) SetDiscovery(discovery discovery.Client) {
+	p.discovery = discovery
+}
+
+func (p *HTTPPool) SetNodesWithDiscovery() error {
+	if p.discovery == nil {
+		return fmt.Errorf("discovery is nil")
+	}
+	services, err := p.discovery.GetServices(p.opts.BasePath)
+	if err != nil {
+		return fmt.Errorf("get services failed: %v", err)
+	}
+	for _, service := range services {
+		p.Add(service.Endpoint)
+	}
+	return nil
+}
+
+func (p *HTTPPool) Register() error {
+	if p.discovery == nil {
+		return nil
+	}
+	return p.discovery.Register(discovery.Service{
+		Name:     p.opts.BasePath + p.self,
+		Endpoint: p.self,
+	})
+}
+
+func (p *HTTPPool) Unregister() error {
+	if p.discovery == nil {
+		return nil
+	}
+	return p.discovery.Unregister(discovery.Service{
+		Name:     p.opts.BasePath + p.self,
+		Endpoint: p.self,
+	})
+}
+
+// watch discovery
+func (p *HTTPPool) WatchDiscovery() {
+	if p.discovery == nil {
+		return
+	}
+	// watch discovery
+	eventChan, err := p.discovery.WatchPrefix(p.opts.BasePath)
+	if err != nil {
+		return
+	}
+	// watch event
+	go func() {
+		for event := range eventChan {
+			if event.Type == discovery.EventPut {
+				p.Add(event.Key[len(p.opts.BasePath):])
+			}
+			if event.Type == discovery.EventDelete {
+				p.Remove(event.Key[len(p.opts.BasePath):])
+			}
+		}
+	}()
 }
