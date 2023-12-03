@@ -61,6 +61,33 @@ func (m *Map) Add(keys ...string) {
 	sort.Ints(m.keys)
 }
 
+// Reset the hash
+func (m *Map) Reset() {
+	m.keys = m.keys[:0]
+	m.hashMap = make(map[int]string)
+}
+
+// Remove removes some keys from the hash.
+func (m *Map) Remove(keys ...string) {
+
+	keysMap := make(map[string]struct{})
+	for _, k := range m.hashMap {
+		keysMap[k] = struct{}{}
+	}
+
+	for _, key := range keys {
+		delete(keysMap, key)
+	}
+
+	newKeys := make([]string, 0, len(keysMap))
+	for k := range keysMap {
+		newKeys = append(newKeys, k)
+	}
+
+	m.Reset()
+	m.Add(newKeys...)
+}
+
 // Get gets the closest item in the hash to the provided key.
 func (m *Map) Get(key string) string {
 	if m.IsEmpty() {
