@@ -104,7 +104,7 @@ SingleFlight ..|> flightGroup
 - Consistent Hash
 - SingleFlight
 - http.RoundTripper
-- gRPC
+- Protobuf
 
 
 ## Comparison to memcached
