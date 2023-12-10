@@ -25,6 +25,7 @@ type Client struct {
 	heartbeat time.Duration
 	leaseID   etcd.LeaseID
 	once      sync.Once
+	leaser    etcd.Lease
 }
 
 const (
@@ -125,6 +126,7 @@ func (c *Client) WatchPrefix(basePath string) (discovery.EventChan, error) {
 
 func (c *Client) InitLease(ttl int64) error {
 	lease := etcd.NewLease(c.client)
+	c.leaser = lease
 	leaseResp, err := lease.Grant(c.ctx, ttl)
 	if err != nil {
 		return fmt.Errorf("grant lease failed: %v", err)
@@ -139,7 +141,7 @@ func (c *Client) Register(service discovery.Service) error {
 		if err != nil {
 			return
 		}
-		go c.loop()
+		go c.keepAlive()
 	})
 
 	if c.leaseID == 0 {
@@ -160,26 +162,11 @@ func (c *Client) Unregister(service discovery.Service) error {
 	return err
 }
 
-func (c *Client) loop() {
-	tick := time.NewTicker(c.heartbeat)
-	defer tick.Stop()
-	for {
-		select {
-		case <-tick.C:
-			c.keepAlive()
-		case <-c.ctx.Done():
-			return
-		}
-	}
-}
-
 func (c *Client) keepAlive() {
-	lease := etcd.NewLease(c.client)
-	leaseKeepAliveQueue, err := lease.KeepAlive(c.ctx, c.leaseID)
+	leaseKeepAliveQueue, err := c.leaser.KeepAlive(c.ctx, c.leaseID)
 	if err != nil {
 		panic(err)
 	}
-
 	for {
 		select {
 		case _, ok := <-leaseKeepAliveQueue:
